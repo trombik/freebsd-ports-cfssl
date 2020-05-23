@@ -15,7 +15,7 @@ LICENSE_FILE=	${WRKSRC}/LICENSE
 
 LIB_DEPENDS=	libltdl.so:devel/libltdl
 
-USES=	go:modules gmake
+USES=	go:no_targets gmake
 USE_GITHUB=	yes
 GH_ACCOUNT= cloudflare
 GH_TAGNAME=	v${DISTVERSION}
@@ -54,27 +54,27 @@ GH_TUPLE=	\
 	zmap:zcrypto:9051775e6a2e:zmap_zcrypto/vendor/github.com/zmap/zcrypto \
 	zmap:zlint:fd021b4cfbeb:zmap_zlint/vendor/github.com/zmap/zlint
 
-# for unresolable goose
+# XXX for unresolable goose
 # ::8488cc47d90c:group_name/vendor/bitbucket.org/liamstask/goose
 GOOSE_ACCOUNT=	liamstask
 GOOSE_PROJECT=	goose
 GOOSE_COMMIT=	8488cc47d90c
-
-CFSSL_BINS=	cfssl cfssl-bundle cfssl-certinfo cfssl-newkey cfssl-scan cfssljson mkbundle multirootca
-GO_TARGET=	${CFSSL_BINS}
-.for F in ${CFSSL_BINS}
-PLIST_FILES+=	bin/${F}
-.endfor
 
 pre-configure:
 	${REINPLACE_CMD} -e 's|%%DISTVERSION%%|${DISTVERSION}|g' ${WRKSRC}/cli/version/version.go
 
 # the project uses Makefile for build and installation
 do-build:
-	(cd ${BUILD_WRKSRC} && \
+	(cd ${WRKSRC} && \
 	${SETENV} ${MAKE_ENV} ${GO_ENV} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${_MAKE_JOBS} all)
-pre-install:
-	(cd ${BUILD_WRKSRC} && \
-	${SETENV} ${MAKE_ENV} ${GO_ENV} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${_MAKE_JOBS} install)
+
+do-install:
+	# XXX define GOBIN
+	# Makefile is used but the install target uses go install.
+	(cd ${WRKSRC} && \
+	${SETENV} ${MAKE_ENV} ${GO_ENV} GOBIN=${STAGEDIR}${PREFIX}/bin ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${_MAKE_JOBS} install)
+.for F in cfssl cfssl-certinfo multirootca
+	${STRIP_CMD} ${STAGEDIR}${PREFIX}/bin/${F}
+.endfor
 
 .include <bsd.port.mk>
