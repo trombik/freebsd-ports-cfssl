@@ -1,6 +1,7 @@
 PORTNAME=	cfssl
 DISTVERSIONPREFIX=	v
 DISTVERSION=	1.6.1
+PORTREVISION=	1
 CATEGORIES=	security
 
 MAINTAINER=	yuri@FreeBSD.org
@@ -19,6 +20,18 @@ EXES=		cfssl cfssl-bundle cfssl-certinfo cfssl-newkey cfssl-scan cfssljson mkbun
 
 PLIST_FILES=	${EXES:S/^/bin\//}
 
+# SQL files to create certdb, required for API server and OCSP responder.
+CFSSL_DATABASES=	pg mysql sqlite
+CFSSL_SQL_FILES=	\
+	001_CreateCertificates.sql \
+	002_AddMetadataToCertificates.sql
+
+.for D in ${CFSSL_DATABASES}
+.for F in ${CFSSL_SQL_FILES}
+PLIST_FILES+= 	${DATADIR}/certdb/${D}/migrations/${F}
+.endfor
+.endfor
+
 pre-configure:
 	${REINPLACE_CMD} -e 's|%%DISTVERSION%%|${DISTVERSION}|g' ${WRKSRC}/cli/version/version.go
 
@@ -31,6 +44,11 @@ do-install:
 	cd ${WRKSRC} && ${SETENV} ${MAKE_ENV} ${GO_ENV} GOBIN=${STAGEDIR}${PREFIX}/bin ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${_MAKE_JOBS} install
 .for F in cfssl cfssl-certinfo multirootca
 	${STRIP_CMD} ${STAGEDIR}${PREFIX}/bin/${F}
+.endfor
+
+.for D in ${CFSSL_DATABASES}
+	${INSTALL} -d ${DATADIR}/certdb/${D}/migrations
+	${INSTALL_DATA} ${WRKSRC}/certdb/${D}/migrations/*.sql ${DATADIR}/certdb/${D}/migrations/
 .endfor
 
 .include <bsd.port.mk>
