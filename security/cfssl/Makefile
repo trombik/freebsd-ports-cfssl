@@ -25,6 +25,8 @@ PLIST_FILES+=	${CFSSL_EXTRA_TARGETS}
 USE_RC_SUBR=	${PORTNAME}
 USERS=	cfssl
 GROUPS=	cfssl
+# installs a file to the same path
+CONFLICTS=   goose
 
 pre-configure:
 	${REINPLACE_CMD} -e 's|%%DISTVERSION%%|${DISTVERSION}|g' ${WRKSRC}/cli/version/version.go
