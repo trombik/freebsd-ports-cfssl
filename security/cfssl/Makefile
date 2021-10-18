@@ -28,7 +28,7 @@ CFSSL_SQL_FILES=	\
 
 .for D in ${CFSSL_DATABASES}
 .for F in ${CFSSL_SQL_FILES}
-PLIST_FILES+= 	${DATADIR}/certdb/${D}/migrations/${F}
+PLIST_FILES+= 	%%DATADIR%%/certdb/${D}/migrations/${F}
 .endfor
 .endfor
 
@@ -47,8 +47,8 @@ do-install:
 .endfor
 
 .for D in ${CFSSL_DATABASES}
-	${INSTALL} -d ${DATADIR}/certdb/${D}/migrations
-	${INSTALL_DATA} ${WRKSRC}/certdb/${D}/migrations/*.sql ${DATADIR}/certdb/${D}/migrations/
+	${INSTALL} -d ${STAGEDIR}${DATADIR}/certdb/${D}/migrations
+	${INSTALL_DATA} ${WRKSRC}/certdb/${D}/migrations/*.sql ${STAGEDIR}${DATADIR}/certdb/${D}/migrations/
 .endfor
 
 .include <bsd.port.mk>
