@@ -20,18 +20,6 @@ EXES=		cfssl cfssl-bundle cfssl-certinfo cfssl-newkey cfssl-scan cfssljson mkbun
 
 PLIST_FILES=	${EXES:S/^/bin\//}
 
-# SQL files to create certdb, required for API server and OCSP responder.
-CFSSL_DATABASES=	pg mysql sqlite
-CFSSL_SQL_FILES=	\
-	001_CreateCertificates.sql \
-	002_AddMetadataToCertificates.sql
-
-.for D in ${CFSSL_DATABASES}
-.for F in ${CFSSL_SQL_FILES}
-PLIST_FILES+= 	%%DATADIR%%/certdb/${D}/migrations/${F}
-.endfor
-.endfor
-
 CFSSL_EXTRA_TARGETS=	bin/goose
 PLIST_FILES+=	${CFSSL_EXTRA_TARGETS}
 
@@ -49,9 +37,9 @@ do-install:
 	${STRIP_CMD} ${STAGEDIR}${PREFIX}/bin/${F}
 .endfor
 
-.for D in ${CFSSL_DATABASES}
-	${INSTALL} -d ${STAGEDIR}${DATADIR}/certdb/${D}/migrations
-	${INSTALL_DATA} ${WRKSRC}/certdb/${D}/migrations/*.sql ${STAGEDIR}${DATADIR}/certdb/${D}/migrations/
+	${INSTALL} -d ${STAGEDIR}${DATADIR}
+.for D in certdb/sqlite certdb/pg certdb/mysql
+	cd ${WRKSRC} && ${COPYTREE_SHARE} ${D} ${STAGEDIR}${DATADIR}
 .endfor
 
 .for F in ${CFSSL_EXTRA_TARGETS}
