@@ -1,8 +1,0 @@
-bin/cfssl
-bin/cfssl-bundle
-bin/cfssl-certinfo
-bin/cfssl-newkey
-bin/cfssl-scan
-bin/cfssljson
-bin/mkbundle
-bin/multirootca
